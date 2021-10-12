@@ -9,7 +9,7 @@ set -e
     RED='\033[0;31m'
     NC='\033[0m' # No Color
 
-    STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+    STAGED_FILES_FILE=".git/hooks/lint-staged-list"
     LINT_STAGED_FILES_SCRIPT=".git/hooks/lint-staged-files"
 
     # CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }')"
@@ -31,8 +31,15 @@ set -e
         exit 0
     fi
 
-    echo "FORMATTING FILES..."
-    ./$LINT_STAGED_FILES_SCRIPT
+    # TODO
+    echo "TODO: this automatic format part needs to be automated yet..."
+    echo "Please just execute the following command manually and be happy:"
+    echo "    ./$LINT_STAGED_FILES_SCRIPT"
+    echo ""
+    echo "NOTE: this push is being aborted so you can add a new commit with your linting"
+
+    # echo "FORMATTING FILES..."
+    # ./$LINT_STAGED_FILES_SCRIPT
     echo "--- END KTLINT HOOK ---"
 
     exit 1

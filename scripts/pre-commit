@@ -9,7 +9,7 @@ set -e
     RED='\033[0;31m'
     NC='\033[0m' # No Color
 
-    STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+    STAGED_FILES_FILE=".git/hooks/lint-staged-list"
     CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }')"
 
     if [ -z "$CHANGED_FILES" ]; then

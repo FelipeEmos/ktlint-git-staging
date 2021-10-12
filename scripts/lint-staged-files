@@ -7,7 +7,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+STAGED_FILES_FILE=".git/hooks/lint-staged-list"
 
 if ! [ -f $STAGED_FILES_FILE ]; then
     echo "ERROR: Path to staged files doesn't exist:"
@@ -16,7 +16,6 @@ if ! [ -f $STAGED_FILES_FILE ]; then
 fi
 
 STAGED_FILES="$(awk '$1 == "pick" {print $2}' $STAGED_FILES_FILE | sort)"
-# STAGED_FILES="$(awk '$1 == "pick" {print $2}' $STAGED_FILES_FILE | sort)"
 CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }' | sort)"
 INTERSECTION=$(printf '%s\n%s' "$STAGED_FILES" "$CHANGED_FILES" | sort | uniq -d)
 
