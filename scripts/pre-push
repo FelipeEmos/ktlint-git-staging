@@ -35,6 +35,6 @@ set -e
     ./$LINT_STAGED_FILES_SCRIPT
     echo "--- END KTLINT HOOK ---"
 
-    exit 0
+    exit 1
     
 ######## KTLINT-GRADLE HOOK END ########
