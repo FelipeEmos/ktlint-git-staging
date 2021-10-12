@@ -1,0 +1,61 @@
+#!/bin/sh
+set -e
+
+######## KTLINT-GRADLE HOOK START ########
+
+    # DEFINING COLOR
+    PURPLE='\033[0;35m'
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+
+    STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+    CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }')"
+
+    if [ -z "$CHANGED_FILES" ]; then
+        echo "No Kotlin files were changed."
+        exit 0
+    fi;
+
+    echo "--- KTLINT HOOK ---"
+    echo "The following kotlin files were modified and can be staged for lint formatting later:"
+    echo "  (edit \"$STAGED_FILES_FILE\" to configure staging later)"
+    printf "\t${GREEN}%s${NC}\n" $(echo $CHANGED_FILES | sed 's/ /\n\t/g')
+    echo ""
+    exec < /dev/tty # Moves stdin to user keyboard
+    read -p "Do you want to stage them for being formatted later? (Y/N): " answer
+    if [[ $answer != [yYsSeE]  ]]; then
+        exit 0
+    fi
+
+    echo "STAGING FILES..."
+
+    # Initialize STAGED_FILES
+    if ! [ -f $STAGED_FILES_FILE ]; then
+        echo "# --------------------------- #" > $STAGED_FILES_FILE
+        echo "# ---- STAGED FOR KTLINT ---- #" >> $STAGED_FILES_FILE
+        echo "# --------------------------- #" >> $STAGED_FILES_FILE
+        echo "#" >> $STAGED_FILES_FILE
+        echo "# Command:" >> $STAGED_FILES_FILE
+        echo "# pick = staged for lint formatting" >> $STAGED_FILES_FILE
+        echo "# anything else = ignore file until this line persists" >> $STAGED_FILES_FILE
+        echo "#" >> $STAGED_FILES_FILE
+        echo "#" >> $STAGED_FILES_FILE
+        echo "# Order doesn't matter." >> $STAGED_FILES_FILE
+        echo "#" >> $STAGED_FILES_FILE
+        echo "" >> $STAGED_FILES_FILE
+    fi
+
+    echo "$CHANGED_FILES" | while read -r file; do
+        if [ -f $file ]; then
+            echo "pick $file" >> $STAGED_FILES_FILE
+        fi
+    done
+
+    # Remove duplicate stages of file
+    awk -i inplace '!seen[$2]++' $STAGED_FILES_FILE
+    echo "--- END KTLINT HOOK ---"
+
+    exit 0
+    
+######## KTLINT-GRADLE HOOK END ########

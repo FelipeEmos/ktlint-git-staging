@@ -1,0 +1,40 @@
+#!/bin/sh
+set -e
+
+######## KTLINT-GRADLE HOOK START ########
+
+    # DEFINING COLOR
+    PURPLE='\033[0;35m'
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+
+    STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+    LINT_STAGED_FILES_SCRIPT=".git/hooks/lint-staged-files"
+
+    # CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }')"
+
+    if ! [ -f $STAGED_FILES_FILE ]; then
+        exit 0
+    fi
+
+    STAGED_FILES="$(awk '$1 == "pick" {print $2}' $STAGED_FILES_FILE | sort)"
+
+    echo "--- KTLINT HOOK ---"
+    echo "The following kotlin files are staged for lint formatting:"
+    echo "  (edit \"$STAGED_FILES_FILE\" to configure staging)"
+    printf "\t${GREEN}%s${NC}\n" $(echo $CHANGED_FILES | sed 's/ /\n\t/g')
+    echo ""
+    exec < /dev/tty # Moves stdin to user keyboard
+    read -p "Maybe it's a good idea to lint format them now. Do you to lint format? (Y/N): " answer
+    if [[ $answer != [yYsSeE]  ]]; then
+        exit 0
+    fi
+
+    echo "FORMATTING FILES..."
+    ./$LINT_STAGED_FILES_SCRIPT
+    echo "--- END KTLINT HOOK ---"
+
+    exit 0
+    
+######## KTLINT-GRADLE HOOK END ########

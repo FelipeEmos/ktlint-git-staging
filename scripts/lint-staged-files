@@ -1,0 +1,51 @@
+#!/bin/sh
+set -e
+
+# DEFINING COLOR
+PURPLE='\033[0;35m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+STAGED_FILES_FILE=".git/hooks/ktlint-staged-files"
+
+if ! [ -f $STAGED_FILES_FILE ]; then
+    echo "ERROR: Path to staged files doesn't exist:"
+    printf "\t${PURPLE}\"%s\"${NC}\n" "$STAGED_FILES_FILE"
+    exit 0
+fi
+
+STAGED_FILES="$(awk '$1 == "pick" {print $2}' $STAGED_FILES_FILE | sort)"
+# STAGED_FILES="$(awk '$1 == "pick" {print $2}' $STAGED_FILES_FILE | sort)"
+CHANGED_FILES="$(git --no-pager diff --name-status --no-color --cached | awk '$1 != "D" && $NF ~ /\.kts?$/ { print $NF }' | sort)"
+INTERSECTION=$(printf '%s\n%s' "$STAGED_FILES" "$CHANGED_FILES" | sort | uniq -d)
+
+# In case we try to lint format an uncommited file
+if ! [ -z "$INTERSECTION" ]; then
+    echo "---- WARNING ---"
+    echo "The following files are staged for linting but they are not commited:"
+    echo "  (edit file at \"$STAGED_FILES_FILE\" to unstage)"
+    printf "\t${RED}%s${NC}\n" $(echo $INTERSECTION | sed 's/ /\n\t/g')
+    echo ""
+    echo "Linting them now may mix linting with other possibily non related modifications." 
+    echo "  (which can make your git history unorganized)"
+    echo ""
+    echo "ABORTING..."
+    echo ""
+    exit 0
+fi;
+
+echo "---- KTLINTING ----"
+printf "Running lint ${BLUE}FORMAT${NC} on files:"
+echo ""
+printf "\t${GREEN}%s${NC}\n" $(echo $STAGED_FILES | sed 's/ /\n\t/g')
+
+./gradlew --quiet ktlintFormat -PinternalKtlintGitFilter="$STAGED_FILES"
+
+echo "Completed ktlint format!"
+
+# Unstage formated files
+EXCLUDE_CONTAINING=$(printf '%s\n' "${STAGED_FILES}" | tr '\n' '\|' | tr '.' '\.')
+EXCLUDE_CONTAINING=${EXCLUDE_CONTAINING::-1}
+
+sed -i -E "/${EXCLUDE_CONTAINING}/ d" $STAGED_FILES_FILE
