@@ -23,7 +23,7 @@ set -e
     echo "--- KTLINT HOOK ---"
     echo "The following kotlin files are staged for lint formatting:"
     echo "  (edit \"$STAGED_FILES_FILE\" to configure staging)"
-    printf "\t${GREEN}%s${NC}\n" $(echo $CHANGED_FILES | sed 's/ /\n\t/g')
+    printf "\t${GREEN}%s${NC}\n" $(echo $STAGED_FILES | sed 's/ /\n\t/g')
     echo ""
     exec < /dev/tty # Moves stdin to user keyboard
     read -p "Maybe it's a good idea to lint format them now. Do you to lint format? (Y/N): " answer
