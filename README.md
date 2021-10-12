@@ -1,4 +1,4 @@
-# Better ktlint workflow
+#Better ktlint workflow
 
 Specially if you are working on legacy code and you don't want to lint your entire project, it's very useful to have control over your linting process and select which files to be linted. The scripts installed from this project do the following:
 
@@ -15,6 +15,7 @@ Specially if you are working on legacy code and you don't want to lint your enti
 
 # Instalation
 
+Make sure your project is setup correctly with [ktlint-gradle](https://github.com/JLLeitschuh/ktlint-gradle) and then run:
 ``` shell
 chmod +x install.sh
 ./install.sh <your-git-directory>
